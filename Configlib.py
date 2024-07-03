@@ -6,7 +6,7 @@ import Textlib as tlb
 opDir = os.path.dirname(os.path.realpath(__file__))
 filepath = f'{opDir}\\Config\\mainConfig.json'
 
-def initCfg():
+def openCfg():
     global filepath
 
     #try and open configuration file
@@ -31,4 +31,6 @@ def initCfg():
     #return config as dictionary array
     return(cfg)
 
-initCfg()
+def updateCfg(cfg):
+    cfgdump = json.dumps(cfg, sort_keys=True, indent=2)
+    open(filepath,"w").write(cfgdump)

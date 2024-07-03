@@ -1,7 +1,11 @@
 import os
 
-loggen = False
-verbosity = True
+#start config
+import Configlib as clib
+cfg = clib.openCfg()
+
+loggen = cfg["terminal"]["generate-log"]
+verbosity = cfg["terminal"]["write-in-terminal"]
 
 # set up inhouse log generation and text beautification library
 import Textlib
