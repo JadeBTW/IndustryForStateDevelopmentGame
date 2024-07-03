@@ -40,25 +40,28 @@ def colprint(txtype=0,txtcol=37,bgcol=40,text="",end="\n"):
 
 #automated log file writing and coloured formatted printing for three main types of information printouts
 #info for noncritical logging of progress and happenings
-def terminfo(text,logfile,verbosity=True,writelog=True):
+def terminfo(text,logfile=None,verbosity=True,writelog=True):
     txtformat = f'[INFO] {text}'
     if verbosity == True:
         colprint(txtype=1,text=txtformat,txtcol=32)
-    if writelog == True:
-        log.writeLog(logfile,txtformat)
+    if logfile != None:
+        if writelog == True:
+            log.writeLog(logfile,txtformat)
 
 #warn for important but noncritical alerts
-def termwarn(text,logfile,verbosity=True,writelog=True):
+def termwarn(text,logfile=None,verbosity=True,writelog=True):
     txtformat = f'[WARN] {text}'
     if verbosity == True:
         colprint(txtype=1,text=txtformat,txtcol=33)
-    if writelog == True:
-        log.writeLog(logfile,txtformat)
+    if logfile != None:
+        if writelog == True:
+            log.writeLog(logfile,txtformat)
 
 #critical for critical errors that cause major functionality breakdown or crash
-def termcritical(text,logfile,verbosity=True,writelog=True):
+def termcritical(text,logfile=None,verbosity=True,writelog=True):
     txtformat = f'[CRITICAL] {text}'
     if verbosity == True:
         colprint(txtype=1,text=txtformat,txtcol=31)
-    if writelog == True:
-        log.writeLog(logfile,txtformat)
+    if logfile != None:
+        if writelog == True:
+            log.writeLog(logfile,txtformat)

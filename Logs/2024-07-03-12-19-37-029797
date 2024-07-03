@@ -1,5 +1,0 @@
-[INFO] Started Log File and initialised terminal library
-[INFO] running terminal formatting test (if colors do not work you may be using a non ANSI compatible system)
-[INFO] this is an info entry
-[WARN] this is a warn entry
-[CRITICAL] this is a critical error entry

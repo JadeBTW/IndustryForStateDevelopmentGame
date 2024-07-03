@@ -1,6 +1,6 @@
 import os
 
-loggen = True
+loggen = False
 verbosity = True
 
 # set up inhouse log generation and text beautification library
