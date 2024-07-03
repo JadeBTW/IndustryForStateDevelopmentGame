@@ -1,11 +1,15 @@
 import os
 
-#start config
+#start config lib and global cfg dict
 import Configlib as clib
 cfg = clib.openCfg()
 
 loggen = cfg["terminal"]["generate-log"]
 verbosity = cfg["terminal"]["write-in-terminal"]
+
+#import and start proportional graphics scaling lib
+import Guiscalelib as gsl
+gsl.updateVals(cfg["window-settings"]["win-width"],cfg["window-settings"]["win-height"])
 
 # set up inhouse log generation and text beautification library
 import Textlib

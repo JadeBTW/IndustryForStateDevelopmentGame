@@ -1,3 +1,4 @@
+import Textlib
 scrW = 0
 scrH = 0
 scrPrcW = 0
@@ -9,6 +10,7 @@ def updateVals(width=1280,height=920):
     scrW = width
     scrPrcH = height/100
     scrPrcW = width/100
+    Textlib.terminfo(f'screen initialized as w:{width} h:{height}')
 
 def percH(hprc):
     global scrPrcH
