@@ -1,0 +1,11 @@
+{
+  "terminal": {
+    "generate-log": false,
+    "write-in-terminal": true
+  },
+  "window-settings": {
+    "win-height": 920,
+    "win-width": 1280,
+    "window-mode": "windowed"
+  }
+}
