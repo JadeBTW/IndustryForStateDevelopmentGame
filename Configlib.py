@@ -21,16 +21,21 @@ def openCfg():
         open(filepath,"w")
         cfgdump = open(filepath,"r").read()
         print(cfgdump)
+
+        #if config is empty generate new template json assembler
         if cfgdump == "":
             cfg = {"terminal":{"generate-log":False,"write-in-terminal":True},"window-settings":{"window-mode":"windowed","win-width":1280,"win-height":920}}
             cfgdump = json.dumps(cfg, sort_keys=True, indent=2)
             open(filepath,"w").write(cfgdump)
+
+        #if config does exist load it into the dictionary var
         else:
             cfg = json.loads(cfgdump)
 
     #return config as dictionary array
     return(cfg)
 
+#generates and writes internal dict version of config to json file for permanent storage
 def updateCfg(cfg):
     cfgdump = json.dumps(cfg, sort_keys=True, indent=2)
     open(filepath,"w").write(cfgdump)
