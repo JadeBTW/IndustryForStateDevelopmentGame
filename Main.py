@@ -1,7 +1,6 @@
-import os
+import os, pygame as pyg, Guiscalelib as gsl, Configlib as clib, time as t
 
 #start config lib and global cfg dict
-import Configlib as clib
 cfg = clib.openCfg()
 
 #set internal variables to file config ver
@@ -9,24 +8,67 @@ loggen = cfg["terminal"]["generate-log"]
 verbosity = cfg["terminal"]["write-in-terminal"]
 
 #import and start proportional graphics scaling lib
-import Guiscalelib as gsl
 gsl.updateVals(cfg["window-settings"]["win-width"],cfg["window-settings"]["win-height"])
 
-# set up inhouse log generation and text beautification library
+#start log generation and text beautification library
 import Textlib
 log = Textlib.log #instanciating log object
 Textlib.log.__init__(log)
 Textlib.terminfo('Started Log File and initialised terminal library',log,verbosity,loggen)
 Textlib.terminfo('running terminal formatting test (if colors do not work you may be using a non ANSI compatible system)',log,verbosity,loggen)
 
-#1 print of each terminal type to test coloring in term
-Textlib.terminfo('this is an info entry',log,verbosity,loggen)
-Textlib.termwarn('this is a warn entry',log,verbosity,loggen)
-Textlib.termcritical('this is a critical error entry',log,verbosity,loggen)
-
 #import and init pygame module
-import pygame
-pygame.init()
+pyg.init()
+win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]))
+pyg.display.set_caption('Industry For State Development BETA')
+
+#delta time frame cap variables
+prvTime = t.time()
+fps = cfg["graphics-settings"]["framerate-cap"]
+
+#start window related variables
+run = True
+win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]))
+pyg.display.set_caption('Industry For State Development BETA')
+
+
+#ui values
+buttonColor = (102, 204, 255)
+buttonHoverColor = (153, 204, 255)
+textColor = (12, 12, 12)
+smallfont = pyg.font.SysFont('Corbel',20)
+
+while run:
+
+    #calculate how long a frame took to draw and calculate required delay to pin fps
+    crrTime = t.time()
+    diff = crrTime - prvTime
+    prvTime = crrTime
+    delayTime = 1./fps - diff
+
+    #if time taken to draw last frame was less than the maximum to maintain desired fps, wait amount required to hold desired fps
+    if delayTime > 0:
+        t.sleep(delayTime)
+
+
+    #default background
+    win.fill('#81becc')
+
+    #handle window event buffer
+    for event in pyg.event.get():
+
+        #when close button pressed
+        if event.type == pyg.QUIT:
+            run = False
+            Textlib.terminfo('program Closed Manually',log,verbosity,loggen)
+
+        #handle mouseclick
+        if event.type == pyg.MOUSEBUTTONDOWN:
+            mousePos = pyg.mouse.get_pos()
+    
+    #update frame
+    pyg.display.update()
+
 
 #exit program and generate log
 if loggen == True:
