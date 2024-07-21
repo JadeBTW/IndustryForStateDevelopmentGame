@@ -37,7 +37,38 @@ buttonColor = (102, 204, 255)
 buttonHoverColor = (153, 204, 255)
 textColor = (12, 12, 12)
 smallfont = pyg.font.SysFont('Corbel',20)
+buttonBuffer = []
 
+testButton  = button(100,200,100,50)
+
+#button shit
+
+class button():
+
+    def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000"):
+        self.rect = pyg.Rect(posx,posy,w,h)
+        self.text = smallfont.render(text,True,textCol)
+        self.img = img
+        self.selImg = selImg
+        self.col = col
+        self.selCol = selCol
+        self.textCol = textCol
+        self.text = text
+        
+    def grabDat(self):
+        return self.rect
+    
+    def pushToBuffer(self,buffer):
+        buffer.append(self)
+    
+    def renderButton(self,mousePos):
+        pass
+    
+    def drawToScreen(buffer,mousePos):
+        for unit in buffer:
+            pass
+        
+    
 while run:
 
     #calculate how long a frame took to draw and calculate required delay to pin fps
