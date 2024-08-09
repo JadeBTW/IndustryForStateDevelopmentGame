@@ -39,15 +39,12 @@ textColor = (12, 12, 12)
 smallfont = pyg.font.SysFont('Corbel',20)
 buttonBuffer = []
 
-testButton  = button(100,200,100,50)
-
 #button shit
-
 class button():
 
     def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000"):
         self.rect = pyg.Rect(posx,posy,w,h)
-        self.text = smallfont.render(text,True,textCol)
+        self.textSurf = smallfont.render(text,True,textCol)
         self.img = img
         self.selImg = selImg
         self.col = col
@@ -61,13 +58,20 @@ class button():
     def pushToBuffer(self,buffer):
         buffer.append(self)
     
-    def renderButton(self,mousePos):
-        pass
+    def renderButton(self,mousePos,win):
+        if mousePos[0] > self.rect.x and mousePos[0] < (self.rect.x + self.rect.width) and mousePos[1] > self.rect.y and mousePos[1] < (self.rect.y + self.rect.height):
+            pyg.draw.rect(win,self.selCol,self.rect)
+        else:
+            pyg.draw.rect(win,self.col,self.rect)
+        win.blit(self.textSurf,(self.rect.x+5,self.rect.centery-10))
     
-    def drawToScreen(buffer,mousePos):
+    def drawToScreen(buffer,mousePos,win):
         for unit in buffer:
-            pass
-        
+            unit.renderButton(mousePos,win)
+        buffer = []
+
+#ui assembley and definition
+testButton  = button(100,200,100,50,text="test_icles")  
     
 while run:
 
@@ -81,6 +85,8 @@ while run:
     if delayTime > 0:
         t.sleep(delayTime)
 
+    #draw all ui elements here so mouseclick event can recive full object buffer
+    testButton.pushToBuffer(buttonBuffer)
 
     #default background
     win.fill('#81becc')
@@ -96,6 +102,9 @@ while run:
         #handle mouseclick
         if event.type == pyg.MOUSEBUTTONDOWN:
             mousePos = pyg.mouse.get_pos()
+
+    #render button buffer after click interaction check
+    button.drawToScreen(buttonBuffer,pyg.mouse.get_pos(),win)
     
     #update frame
     pyg.display.update()
