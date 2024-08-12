@@ -1,5 +1,9 @@
 import os, pygame as pyg, Guiscalelib as gsl, Configlib as clib, time as t
 
+#determine fixed filepath to operating directory for assets
+opDir = os.path.dirname(os.path.realpath(__file__))
+filepath = f'{opDir}\\Assets\\'
+
 #start config lib and global cfg dict
 cfg = clib.openCfg()
 
@@ -28,8 +32,15 @@ fps = cfg["graphics-settings"]["framerate-cap"]
 
 #start window related variables
 run = True
-win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]))
+if cfg["window-settings"]["fullscreen"]:
+    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.FULLSCREEN)
+else:
+    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.RESIZABLE)
+
 pyg.display.set_caption('Industry For State Development BETA')
+bg = pyg.image.load(f'{filepath}\\Background Images\\ISD_1920_1200_sunset_factory_TrueRes.png')
+bg = pyg.transform.scale(bg,(cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]))
+bgEnabled = True
 
 
 #ui values
@@ -42,6 +53,7 @@ buttonBuffer = []
 #button shit
 class button():
 
+    #start button object with deafault configuration parameters
     def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000"):
         self.rect = pyg.Rect(posx,posy,w,h)
         self.textSurf = smallfont.render(text,True,textCol)
@@ -51,23 +63,32 @@ class button():
         self.selCol = selCol
         self.textCol = textCol
         self.text = text
-        
+    
+    #return rect position object of button instance
     def grabDat(self):
         return self.rect
     
+    #push button object to active buffer for this frame
     def pushToBuffer(self,buffer):
         buffer.append(self)
     
+    #render button object including mouse hover detection
     def renderButton(self,mousePos,win):
+
+        #draw rectangle as gray if mouse in bounds, else draw standard configured color
         if mousePos[0] > self.rect.x and mousePos[0] < (self.rect.x + self.rect.width) and mousePos[1] > self.rect.y and mousePos[1] < (self.rect.y + self.rect.height):
             pyg.draw.rect(win,self.selCol,self.rect)
         else:
             pyg.draw.rect(win,self.col,self.rect)
+
+        #draw text
         win.blit(self.textSurf,(self.rect.x+5,self.rect.centery-10))
     
+    #draw all button instances in frame buffer to screen using renderbutton method
     def drawToScreen(buffer,mousePos,win):
         for unit in buffer:
             unit.renderButton(mousePos,win)
+        #clear buffer for next frame
         buffer = []
 
 #ui assembley and definition
@@ -85,14 +106,23 @@ while run:
     if delayTime > 0:
         t.sleep(delayTime)
 
+    #draw background image when enabled
+    if bgEnabled:
+        #preloaded image
+        win.blit(bg,(0,0))
+    else:
+        #default background
+        win.fill('#81becc')
+
     #draw all ui elements here so mouseclick event can recive full object buffer
     testButton.pushToBuffer(buttonBuffer)
 
-    #default background
-    win.fill('#81becc')
-
     #handle window event buffer
     for event in pyg.event.get():
+
+        #handle window rezise event
+        if event.type == pyg.WINDOWRESIZED:
+            bg = pyg.transform.scale(bg,pyg.display.get_surface().get_size())
 
         #when close button pressed
         if event.type == pyg.QUIT:
