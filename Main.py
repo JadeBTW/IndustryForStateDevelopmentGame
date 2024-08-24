@@ -44,6 +44,7 @@ bgEnabled = True
 
 
 #ui values
+frame = 0
 buttonColor = (102, 204, 255)
 buttonHoverColor = (153, 204, 255)
 textColor = (12, 12, 12)
@@ -52,10 +53,13 @@ buttonBuffer = []
 
 #button shit
 class button():
+        
+    def defaultInteraction():
+        Textlib.terminfo("Button Without Assigned function pressed (function may be missing)",log,verbosity,loggen)
 
     #start button object with deafault configuration parameters
-    def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000"):
-        self.rect = pyg.Rect(posx,posy,w,h)
+    def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000",onClick=defaultInteraction):
+        self.rect = pyg.Rect((posx),posy,w,h)
         self.textSurf = smallfont.render(text,True,textCol)
         self.img = img
         self.selImg = selImg
@@ -63,6 +67,7 @@ class button():
         self.selCol = selCol
         self.textCol = textCol
         self.text = text
+        self.func = onClick
     
     #return rect position object of button instance
     def grabDat(self):
@@ -82,7 +87,7 @@ class button():
             pyg.draw.rect(win,self.col,self.rect)
 
         #draw text
-        win.blit(self.textSurf,(self.rect.x+5,self.rect.centery-10))
+        win.blit(self.textSurf,(self.rect.centerx-(self.textSurf.get_width()/2),self.rect.centery-(self.textSurf.get_height()/2)))
     
     #draw all button instances in frame buffer to screen using renderbutton method
     def drawToScreen(buffer,mousePos,win):
@@ -91,8 +96,30 @@ class button():
         #clear buffer for next frame
         buffer = []
 
+    def collisionCheck(buffer,mousePos):
+        for i in buffer:
+            if mousePos[0] > i.rect.x and mousePos[0] < (i.rect.x + i.rect.width) and mousePos[1] > i.rect.y and mousePos[1] < (i.rect.y + i.rect.height):
+                i.func()
+
+#draw all objects in list
+def pageObjectRender(pageLs,render,buttonBuffer):
+    if render:
+        for i in pageLs:
+            try:
+                i.pushToBuffer(buttonBuffer)
+            except:
+                Textlib.terminfo(f'encountered error while attempting to draw page buttons: {pageLs}',log,verbosity,loggen)
+
 #ui assembley and definition
-testButton  = button(100,200,100,50,text="test_icles")  
+#main menu buttons VVVVVVV
+MainMenu = True
+MainMenuButtons = []
+
+#settings button
+def SettingsButtonFunc():
+    Textlib.terminfo("button pressed lmao",log,verbosity,loggen)
+SettingsButton = button(gsl.percW(50),gsl.percH(50),100,50,text="Settings",onClick=SettingsButtonFunc)
+MainMenuButtons.append(SettingsButton)
     
 while run:
 
@@ -105,6 +132,12 @@ while run:
     #if time taken to draw last frame was less than the maximum to maintain desired fps, wait amount required to hold desired fps
     if delayTime > 0:
         t.sleep(delayTime)
+    
+    #update frame count
+    frame += 1
+    if frame > fps:
+        frame = 1
+    #print()
 
     #draw background image when enabled
     if bgEnabled:
@@ -115,7 +148,10 @@ while run:
         win.fill('#81becc')
 
     #draw all ui elements here so mouseclick event can recive full object buffer
-    testButton.pushToBuffer(buttonBuffer)
+    #frame counter
+    win.blit(smallfont.render(f'{frame}/{fps} ({-delayTime} ms Behind)',True,"#000000"),(30,30))
+    #Draw Main Menu Object Instance
+    pageObjectRender(MainMenuButtons,MainMenu,buttonBuffer)
 
     #handle window event buffer
     for event in pyg.event.get():
@@ -123,6 +159,7 @@ while run:
         #handle window rezise event
         if event.type == pyg.WINDOWRESIZED:
             bg = pyg.transform.scale(bg,pyg.display.get_surface().get_size())
+            Textlib.terminfo(f'Window Resizesd to {str(pyg.display.get_surface().get_size())}',log,verbosity,loggen)
 
         #when close button pressed
         if event.type == pyg.QUIT:
@@ -132,12 +169,14 @@ while run:
         #handle mouseclick
         if event.type == pyg.MOUSEBUTTONDOWN:
             mousePos = pyg.mouse.get_pos()
+            button.collisionCheck(buttonBuffer,mousePos)
 
     #render button buffer after click interaction check
     button.drawToScreen(buttonBuffer,pyg.mouse.get_pos(),win)
     
     #update frame
     pyg.display.update()
+    buttonBuffer = []
 
 
 #exit program and generate log
