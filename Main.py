@@ -23,19 +23,20 @@ Textlib.terminfo('running terminal formatting test (if colors do not work you ma
 
 #import and init pygame module
 pyg.init()
-win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]))
+
+#start window related variables
+run = True
+if cfg["window-settings"]["fullscreen"]:
+    dispinfo = pyg.display.Info()
+    win = pyg.display.set_mode((dispinfo.current_w, dispinfo.current_h),pyg.FULLSCREEN)
+else:
+    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.RESIZABLE)
+
 pyg.display.set_caption('Industry For State Development BETA')
 
 #delta time frame cap variables
 prvTime = t.time()
 fps = cfg["graphics-settings"]["framerate-cap"]
-
-#start window related variables
-run = True
-if cfg["window-settings"]["fullscreen"]:
-    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.FULLSCREEN)
-else:
-    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.RESIZABLE)
 
 pyg.display.set_caption('Industry For State Development BETA')
 bg = pyg.image.load(f'{filepath}\\Background Images\\ISD_1920_1200_sunset_factory_TrueRes.png')
@@ -53,13 +54,17 @@ buttonBuffer = []
 
 #button shit
 class button():
+
+    instances = []
         
     def defaultInteraction():
         Textlib.terminfo("Button Without Assigned function pressed (function may be missing)",log,verbosity,loggen)
 
     #start button object with deafault configuration parameters
     def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000",onClick=defaultInteraction):
-        self.rect = pyg.Rect((posx),posy,w,h)
+        funcH = gsl.percH(h)
+        funcW = gsl.percW(w)
+        self.rect = pyg.Rect(gsl.percW(posx)-(funcW/2),gsl.percH(posy)-(funcH/2),funcW,funcH)
         self.textSurf = smallfont.render(text,True,textCol)
         self.img = img
         self.selImg = selImg
@@ -68,7 +73,16 @@ class button():
         self.textCol = textCol
         self.text = text
         self.func = onClick
+        self.posx = posx
+        self.posy = posy
+        self.widthP = w
+        self.heightP = h
+        button.instances.append(self)
     
+    #update the rect object for button on changing of window resolution
+    def updateRect(self):
+        self.rect = pyg.Rect(gsl.percW(self.posx)-(gsl.percW(self.widthP)/2),gsl.percH(self.posy)-(gsl.percH(self.heightP)/2),gsl.percW(self.widthP),gsl.percH(self.heightP))
+
     #return rect position object of button instance
     def grabDat(self):
         return self.rect
@@ -89,6 +103,11 @@ class button():
         #draw text
         win.blit(self.textSurf,(self.rect.centerx-(self.textSurf.get_width()/2),self.rect.centery-(self.textSurf.get_height()/2)))
     
+    #add button to list of all instances
+    def addInstance(self):
+        button.instances.append(self)
+        print(button.instances)
+    
     #draw all button instances in frame buffer to screen using renderbutton method
     def drawToScreen(buffer,mousePos,win):
         for unit in buffer:
@@ -96,10 +115,15 @@ class button():
         #clear buffer for next frame
         buffer = []
 
+    #check if mousepos tuple collides with any objects in frame buffer and if so call operating function for button object
     def collisionCheck(buffer,mousePos):
         for i in buffer:
             if mousePos[0] > i.rect.x and mousePos[0] < (i.rect.x + i.rect.width) and mousePos[1] > i.rect.y and mousePos[1] < (i.rect.y + i.rect.height):
                 i.func()
+    
+    def updateRects():
+        for i in button.instances:
+            i.updateRect()
 
 #draw all objects in list
 def pageObjectRender(pageLs,render,buttonBuffer):
@@ -118,7 +142,7 @@ MainMenuButtons = []
 #settings button
 def SettingsButtonFunc():
     Textlib.terminfo("button pressed lmao",log,verbosity,loggen)
-SettingsButton = button(gsl.percW(50),gsl.percH(50),100,50,text="Settings",onClick=SettingsButtonFunc)
+SettingsButton = button(50,50,10,5,text="Settings",onClick=SettingsButtonFunc)
 MainMenuButtons.append(SettingsButton)
     
 while run:
@@ -158,8 +182,11 @@ while run:
 
         #handle window rezise event
         if event.type == pyg.WINDOWRESIZED:
-            bg = pyg.transform.scale(bg,pyg.display.get_surface().get_size())
-            Textlib.terminfo(f'Window Resizesd to {str(pyg.display.get_surface().get_size())}',log,verbosity,loggen)
+            size = pyg.display.get_surface().get_size()
+            bg = pyg.transform.scale(bg,size)
+            Textlib.terminfo(f'Window Resizesd to {str(size)}',log,verbosity,loggen)
+            gsl.updateVals(size[0],size[1])
+            button.updateRects()
 
         #when close button pressed
         if event.type == pyg.QUIT:
