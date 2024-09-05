@@ -1,3 +1,7 @@
+#get required libs
+import pip
+pip.main(["install","-r","requirements.txt"])
+
 import os, pygame as pyg, Guiscalelib as gsl, Configlib as clib, time as t
 
 #determine fixed filepath to operating directory for assets
@@ -28,7 +32,7 @@ pyg.init()
 run = True
 if cfg["window-settings"]["fullscreen"]:
     dispinfo = pyg.display.Info()
-    win = pyg.display.set_mode((dispinfo.current_w, dispinfo.current_h),pyg.FULLSCREEN)
+    win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.FULLSCREEN)
 else:
     win = pyg.display.set_mode((cfg["window-settings"]["win-width"], cfg["window-settings"]["win-height"]),pyg.RESIZABLE)
 
@@ -61,16 +65,19 @@ class button():
         Textlib.terminfo("Button Without Assigned function pressed (function may be missing)",log,verbosity,loggen)
 
     #start button object with deafault configuration parameters
-    def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#f0f0f0",selCol="#999999",textCol="#000000",onClick=defaultInteraction):
+    def __init__(self,posx,posy,w,h,text="",img=None,selImg=None,col="#495159",selCol="#84BC9C",textCol="#84BC9C",textSelCol="#495159",BorderCol="#84BC9C",onClick=defaultInteraction):
         funcH = gsl.percH(h)
         funcW = gsl.percW(w)
         self.rect = pyg.Rect(gsl.percW(posx)-(funcW/2),gsl.percH(posy)-(funcH/2),funcW,funcH)
         self.textSurf = smallfont.render(text,True,textCol)
+        self.textSelSurf = smallfont.render(text,True,textSelCol)
         self.img = img
         self.selImg = selImg
         self.col = col
         self.selCol = selCol
         self.textCol = textCol
+        self.textSelCol = textSelCol
+        self.borderCol = BorderCol
         self.text = text
         self.func = onClick
         self.posx = posx
@@ -97,11 +104,11 @@ class button():
         #draw rectangle as gray if mouse in bounds, else draw standard configured color
         if mousePos[0] > self.rect.x and mousePos[0] < (self.rect.x + self.rect.width) and mousePos[1] > self.rect.y and mousePos[1] < (self.rect.y + self.rect.height):
             pyg.draw.rect(win,self.selCol,self.rect)
+            win.blit(self.textSelSurf,(self.rect.centerx-(self.textSurf.get_width()/2),self.rect.centery-(self.textSurf.get_height()/2)))
         else:
             pyg.draw.rect(win,self.col,self.rect)
-
-        #draw text
-        win.blit(self.textSurf,(self.rect.centerx-(self.textSurf.get_width()/2),self.rect.centery-(self.textSurf.get_height()/2)))
+            win.blit(self.textSurf,(self.rect.centerx-(self.textSurf.get_width()/2),self.rect.centery-(self.textSurf.get_height()/2)))
+        
     
     #add button to list of all instances
     def addInstance(self):
@@ -139,11 +146,23 @@ def pageObjectRender(pageLs,render,buttonBuffer):
 MainMenu = True
 MainMenuButtons = []
 
+#logo button
+def logoButtonfunc():
+    pass
+logoButton = button(50,22.5,80,25,text="Placeholder Logo Button",onClick=logoButtonfunc)
+MainMenuButtons.append(logoButton)
+
 #settings button
 def SettingsButtonFunc():
     Textlib.terminfo("button pressed lmao",log,verbosity,loggen)
-SettingsButton = button(50,50,10,5,text="Settings",onClick=SettingsButtonFunc)
+SettingsButton = button(22.5,65,25,50,text="Settings",onClick=SettingsButtonFunc)
 MainMenuButtons.append(SettingsButton)
+
+#new game button
+def newGameButtonFunc():
+    Textlib.terminfo("button pressed lmao",log,verbosity,loggen)
+newGameButton = button(55,65,25,55,text="Settings",onClick=newGameButtonFunc)
+MainMenuButtons.append(newGameButton)
     
 while run:
 
